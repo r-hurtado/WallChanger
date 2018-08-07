@@ -4,6 +4,7 @@ from PIL import Image
 import csv
 import os
 import random
+import pyglet
 
 #Seed RNG to insure chaos
 random.seed()
@@ -15,8 +16,13 @@ dirs = ['~/Pictures/']
 savLoc = ['~/Pictures/']
 logNum = [10]
 
-#array to hold all image paths
-imgPaths = []
+#arrays to hold all image paths
+imgHorizPaths = []
+imgVertiPaths = []
+
+#A list of 5-tuples in the form of (x, y, width, height, path)
+#Represents monitor layout
+screens = []
 
 '''
 Read as two column CSV, where col zero is the data type and col one is the data
@@ -24,6 +30,7 @@ Type options:
   dir: directory
   sav: location to save temporary image to
   log: number of previous walls to save as a type of log.
+  --something to help determine monitor layout
   more to come
 '''
 def ReadPrefs():  
@@ -51,24 +58,41 @@ def CheckSubDir(subDir):
       CheckSubDir(subDirName)
     for fileName in fileNames:
       #Only support .jpg for now, needs further testing in ConCatImg()
+      #Need to add some logic here that seperates vertical form ladscape
       if '.jpg' in fileName:
-        imgPaths.append('{}/{}'.format(dirName, fileName))
+        img = Image.open('{}/{}'.format(dirName, fileName))
+        width, height = img.size
+        if width < height:
+          imgVertiPaths.append('{}/{}'.format(dirName, fileName))
+        else:
+          imgHorizPaths.append('{}/{}'.format(dirName, fileName))
 
 def PickWalls():  
   #Recursive loop
   for directory in dirs:
     CheckSubDir(directory)
-  
-  #Pick two images randomly
-  imgs = random.sample(imgPaths, 2)
-  img0 = imgs[0]
-  img1 = imgs[1]
 
-  return img0, img1
+  platform = pyglet.window.get_platform()
+  display = platform.get_default_display()
+  for screen in display.get_screens():
+    scrInfo = str(screen).split(', ')
+    x = int(scrInfo[1].split('x=')[1])
+    y = int(scrInfo[2].split('y=')[1])
+    w = int(scrInfo[3].split('width=')[1])
+    h = int(scrInfo[4].split('height=')[1])
+    if w < h:
+      p = random.sample(imgVertiPaths, 1)[0]
+    else:
+      p = random.sample(imgHorizPaths, 1)[0]
+    screens.append((x, y, w, h, p))
 
-#takes the path of two images and concatenates them horizontally
-def ConCatImg(img0, img1):
-  images = map(Image.open, [img0, img1])
+def ConCatImg():
+  imgs = []
+  for i in screens:
+    imgs.append(i[4])
+    print i
+
+  images = map(Image.open, imgs)
   widths, heights = zip(*(i.size for i in images))
 
   #Only support dual 1920x1080 monitors currently
@@ -104,8 +128,8 @@ def ConCatImg(img0, img1):
 def main():
   pass
   ReadPrefs()
-  img0, img1 = PickWalls()
-  ConCatImg(img0, img1)
+  PickWalls()
+  ConCatImg()
   
   '''
   for x in dirs:
