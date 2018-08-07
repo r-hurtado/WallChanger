@@ -39,7 +39,21 @@ def ReadPrefs():
         logNum[0] = int(row["data"])
 
 def PickWalls():
+  #array to hold all image paths
+  imgPaths = []
   
+  #Nested loop to walk through all subdirectories
+  #for directory in dirs:
+  for dirName, dirNames, fileNames in os.walk('/home/miecatt/Pictures/Walls/Minimal'):
+    for subdirName in dirNames:
+      currentDir = os.path.join(dirName, subdirName)
+      for fileName in fileNames:
+        imgPaths.append('{}{}'.format(currentDir, fileName))
+  print('Images list: {}'.format(len(imgPaths)))
+  imgPathSet = set(imgPaths)
+  print('Images set:  {}'.format(len(imgPathSet)))
+  #for i in range(0, len(imgPathSet), 1000):
+    #print(imgPathSet[i])
 
   return 'Test1.jpg', 'Test2.jpg'
 
@@ -83,11 +97,13 @@ def main():
   img0, img1 = PickWalls()
   ConCatImg(img0, img1)
   
+  '''
   for x in dirs:
     print 'dir: {}'.format(x)
 
   print 'sav: {}'.format(savLoc[0])
   print 'log: {}'.format(logNum[0])
+  '''
   
   fLoc = open("saveLocation.txt", "w")
   fLoc.write('{}{}{}'.format('file://', savLoc[0], 'Wall0.jpg'))
