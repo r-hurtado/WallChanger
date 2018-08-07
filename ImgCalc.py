@@ -3,6 +3,10 @@ import sys
 from PIL import Image
 import csv
 import os
+import random
+
+#Seed RNG to insure chaos
+random.seed()
 
 #default value
 dirs = ['~/Pictures/']
@@ -46,28 +50,30 @@ def CheckSubDir(subDir):
     for subDirName in dirNames:
       CheckSubDir(subDirName)
     for fileName in fileNames:
-      imgPaths.append('{}{}'.format(dirName, fileName))
+      #Only support .jpg for now, needs further testing in ConCatImg()
+      if '.jpg' in fileName:
+        imgPaths.append('{}/{}'.format(dirName, fileName))
 
 def PickWalls():  
   #Recursive loop
-  CheckSubDir('/home/miecatt/Pictures/Walls')
+  for directory in dirs:
+    CheckSubDir(directory)
+  
+  #Pick two images randomly
+  imgs = random.sample(imgPaths, 2)
+  img0 = imgs[0]
+  img1 = imgs[1]
 
-  #Checking for duplicates
-  print('Images list: {}'.format(len(imgPaths)))
-  imgPathSet = set(imgPaths)
-  print('Images set:  {}'.format(len(imgPathSet)))
-  for i in range(0, len(imgPaths), 1000):
-    print(imgPaths[i])
-
-  return 'Test1.jpg', 'Test2.jpg'
+  return img0, img1
 
 #takes the path of two images and concatenates them horizontally
 def ConCatImg(img0, img1):
   images = map(Image.open, [img0, img1])
   widths, heights = zip(*(i.size for i in images))
 
-  total_width = sum(widths)
-  max_height = max(heights)
+  #Only support dual 1920x1080 monitors currently
+  total_width = 1920*2 #sum(widths)
+  max_height = 1080 #max(heights)
 
   #Create blank image at new size
   new_im = Image.new('RGB', (total_width, max_height))
