@@ -72,6 +72,7 @@ def PickWalls():
   for directory in dirs:
     CheckSubDir(directory)
 
+  #Dectect screen geometry
   platform = pyglet.window.get_platform()
   display = platform.get_default_display()
   for screen in display.get_screens():
@@ -90,23 +91,27 @@ def ConCatImg():
   imgs = []
   for i in screens:
     imgs.append(i[4])
-    print i
 
   images = map(Image.open, imgs)
   widths, heights = zip(*(i.size for i in images))
 
-  #Only support dual 1920x1080 monitors currently
-  total_width = 1920*2 #sum(widths)
-  max_height = 1080 #max(heights)
+  total_width = 0
+  max_height = 0
+  
+  for i in screens:
+    if i[0] + i[2] > total_width:
+      total_width = i[0] + i[2]
+    if i[1] + i[3] > max_height:
+      max_height = i[1] + i[3]
 
   #Create blank image at new size
   new_im = Image.new('RGB', (total_width, max_height))
 
   #Insert images into new blank image
-  x_offset = 0
-  for im in images:
-    new_im.paste(im, (x_offset,0))
-    x_offset += im.size[0]
+  for i in range(len(images)):
+    if widths[i] != screens[i][2] or heights[i] != screens[i][3]:
+      images[i] = images[i].crop((0, 0, screens[i][2], screens[i][3]))
+    new_im.paste(images[i], (screens[i][0], screens[i][1]))
 
   #"Backup" wallpapers to "log"
   for x in range(logNum[0]):
