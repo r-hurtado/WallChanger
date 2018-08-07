@@ -11,6 +11,9 @@ dirs = ['~/Pictures/']
 savLoc = ['~/Pictures/']
 logNum = [10]
 
+#array to hold all image paths
+imgPaths = []
+
 '''
 Read as two column CSV, where col zero is the data type and col one is the data
 Type options: 
@@ -38,22 +41,23 @@ def ReadPrefs():
       elif row["type"] == 'log':
         logNum[0] = int(row["data"])
 
-def PickWalls():
-  #array to hold all image paths
-  imgPaths = []
-  
-  #Nested loop to walk through all subdirectories
-  #for directory in dirs:
-  for dirName, dirNames, fileNames in os.walk('/home/miecatt/Pictures/Walls/Minimal'):
-    for subdirName in dirNames:
-      currentDir = os.path.join(dirName, subdirName)
-      for fileName in fileNames:
-        imgPaths.append('{}{}'.format(currentDir, fileName))
+def CheckSubDir(subDir):
+  for dirName, dirNames, fileNames in os.walk(subDir):
+    for subDirName in dirNames:
+      CheckSubDir(subDirName)
+    for fileName in fileNames:
+      imgPaths.append('{}{}'.format(dirName, fileName))
+
+def PickWalls():  
+  #Recursive loop
+  CheckSubDir('/home/miecatt/Pictures/Walls')
+
+  #Checking for duplicates
   print('Images list: {}'.format(len(imgPaths)))
   imgPathSet = set(imgPaths)
   print('Images set:  {}'.format(len(imgPathSet)))
-  #for i in range(0, len(imgPathSet), 1000):
-    #print(imgPathSet[i])
+  for i in range(0, len(imgPaths), 1000):
+    print(imgPaths[i])
 
   return 'Test1.jpg', 'Test2.jpg'
 
