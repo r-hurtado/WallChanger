@@ -110,7 +110,9 @@ def ConCatImg():
   #Insert images into new blank image
   for i in range(len(images)):
     if widths[i] != screens[i][2] or heights[i] != screens[i][3]:
-      images[i] = images[i].crop((0, 0, screens[i][2], screens[i][3]))
+      newX = int((widths[i] - screens[i][2]) / 2)
+      newY = int((heights[i] - screens[i][3]) / 2)
+      images[i] = images[i].crop((newX, newY, newX + screens[i][2], newY + screens[i][3]))
     new_im.paste(images[i], (screens[i][0], screens[i][1]))
 
   #"Backup" wallpapers to "log"
