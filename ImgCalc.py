@@ -27,13 +27,15 @@ screens = []
 '''
 Read as two column CSV, where col zero is the data type and col one is the data
 Type options: 
+  run: 1 to run, 0 to pause
   dir: directory
   sav: location to save temporary image to
   log: number of previous walls to save as a type of log.
-  --something to help determine monitor layout
   more to come
 '''
-def ReadPrefs():  
+def ReadPrefs():
+  run = False
+
   with open('Preferences.conf', mode='r') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     for row in csv_reader:
@@ -51,6 +53,11 @@ def ReadPrefs():
       #if there is a save location given, replace old one (only stores last)
       elif row["type"] == 'log':
         logNum[0] = int(row["data"])
+
+      elif row["type"] == 'run':
+        run = bool(int(row["data"]))
+
+  return run
 
 def CheckSubDir(subDir):
   for dirName, dirNames, fileNames in os.walk(subDir):
@@ -133,21 +140,20 @@ def ConCatImg():
   new_im.save('{}{}'.format(savLoc[0], 'Wall0.jpg'))
 
 def main():
-  pass
-  ReadPrefs()
-  PickWalls()
-  ConCatImg()
-  
-  '''
-  for x in dirs:
-    print 'dir: {}'.format(x)
+  if ReadPrefs():
+    PickWalls()
+    ConCatImg()
+    
+    '''
+    for x in dirs:
+      print 'dir: {}'.format(x)
 
-  print 'sav: {}'.format(savLoc[0])
-  print 'log: {}'.format(logNum[0])
-  '''
-  
-  fLoc = open("saveLocation.txt", "w")
-  fLoc.write('{}{}{}'.format('file://', savLoc[0], 'Wall0.jpg'))
+    print 'sav: {}'.format(savLoc[0])
+    print 'log: {}'.format(logNum[0])
+    '''
+    
+    fLoc = open("saveLocation.txt", "w")
+    fLoc.write('{}{}{}'.format('file://', savLoc[0], 'Wall0.jpg'))
 
 #Need to call main to run the script
 main()
