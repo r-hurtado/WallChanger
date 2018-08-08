@@ -5,6 +5,7 @@ import csv
 import os
 import random
 import pyglet
+import datetime
 
 # Seed RNG to insure chaos
 random.seed()
@@ -16,13 +17,16 @@ dirs = ['~/Pictures/']
 savLoc = ['~/Pictures/']
 logNum = [10]
 
-# arrays to hold all image paths
+# Arrays to hold all image paths
 imgHorizPaths = []
 imgVertiPaths = []
 
 # A list of 5-tuples in the form of (x, y, width, height, path)
 # Represents monitor layout
 screens = []
+
+# A variable used for printing the current time
+now = datetime.datetime.now()
 
 '''
 Read as two column CSV, where col zero is the data type and col one is the data
@@ -33,6 +37,16 @@ Type options:
   log: number of previous walls to save as a type of log.
   more to come
 '''
+
+
+def log(msg):
+    file = open('/home/miecatt/Documents/WallChanger/log.txt', mode='a')
+    now = datetime.datetime.now()
+    now_str = "{:02d}:{:02d}:{:02d}".format(now.hour, now.minute, now.second)
+
+    # Add logic to print warning vs info?
+    file.write('[Shell][info][{}]: {}.\n'.format(now_str, msg))
+    pass
 
 
 def ReadPrefs():
@@ -97,6 +111,7 @@ def PickWalls():
         else:
             p = random.sample(imgHorizPaths, 1)[0]
         screens.append((x, y, w, h, p))
+        log("Image: {}".format(p))
 
 
 def ConCatImg():
